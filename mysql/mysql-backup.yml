@@ -1,0 +1,37 @@
+- name: backup mysql
+  hosts: all
+  vars:
+    mysql_backup_dir: /nfs/backup
+    backup_user: mysql
+  
+  tasks:
+    # tasks file for mysql-backup
+    - name: create backup directory
+      become: true
+      file:
+        path: "{{ mysql_backup_dir }}"
+        state: directory
+        owner: "{{ backup_user }}"
+        group: "{{ backup_user }}"
+        mode: 0700
+
+    - name: create backup script
+      become: true
+      template:
+        src: etc-crond-mysql-backup.j2
+        dest: "{{ mysql_backup_dir }}/mysql-backup.sh"
+        mode: 0755
+        owner: "{{ backup_user }}"
+        group: "{{ backup_user }}"
+
+    - name: Configure backup cron job.
+      cron:
+        name: "Backup cron job"
+        minute: "*/2"
+        hour: "*"
+        day: "*"
+        month: "*"
+        weekday: "*"
+        user: "{{ backup_user }}"
+        job: "{{ mysql_backup_dir }}/mysql-backup.sh"
+        state: "present"
