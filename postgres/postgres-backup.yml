@@ -1,0 +1,37 @@
+- name: backup postgresql
+  hosts: all
+  vars:
+    postgresql_backup_dir: /nfs/backup
+    backup_user: postgres
+  
+  tasks:
+    # tasks file for postgresql-backup
+    - name: postgresql backup | create backup directory
+      become: true
+      file:
+        path: "{{ postgresql_backup_dir }}"
+        state: directory
+        owner: "{{ backup_user }}"
+        group: "{{ backup_user }}"
+        mode: 0700
+
+    - name: create backup script
+      become: true
+      template:
+        src: etc-crond-postgresql-backup.j2
+        dest: "{{ postgresql_backup_dir }}/postgresql-backup.sh"
+        mode: 0755
+        owner: "{{ backup_user }}"
+        group: "{{ backup_user }}"
+
+    - name: Configure backup cron job.
+      cron:
+        name: "Backup cron job"
+        minute: "*/2"
+        hour: "*"
+        day: "*"
+        month: "*"
+        weekday: "*"
+        user: "{{ backup_user }}"
+        job: "{{ postgresql_backup_dir }}/postgresql-backup.sh"
+        state: "present"

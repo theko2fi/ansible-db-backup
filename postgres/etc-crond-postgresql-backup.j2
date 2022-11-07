@@ -1,0 +1,11 @@
+#!/bin/bash
+
+NOW=$(date +%Y%m%d%H%M%S)
+POSTGRESQL_BACKUP=${NOW}_{{ ansible_hostname }}.pgdump.gz
+
+/usr/bin/pg_dumpall | gzip -c > {{ postgresql_backup_dir }}/${POSTGRESQL_BACKUP} 2>> {{ postgresql_backup_dir }}/${POSTGRESQL_BACKUP}.error_log
+
+# Remove backup files that are 3 month old
+rm -f {{ postgresql_backup_dir }}/$(date +%Y%m%d* --date='3 month ago')_{{ ansible_hostname }}.pgdump.gz
+
+

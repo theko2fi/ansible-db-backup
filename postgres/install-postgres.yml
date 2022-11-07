@@ -1,0 +1,12 @@
+- hosts: all
+  become: yes
+  roles:
+    - role: anxs.postgresql
+      vars:
+        postgresql_version: 11
+        postgresql_listen_addresses: "*"
+  # tasks:
+  # - name: update postgres passwd
+  #   ansible.builtin.shell: |
+  #     su postgres -c "psql ALTER USER postgres WITH PASSWORD 'cCc8CpY5Tt9vZe';"
+  
