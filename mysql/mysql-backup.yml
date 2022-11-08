@@ -1,8 +1,11 @@
 - name: backup mysql
   hosts: all
   vars:
-    mysql_backup_dir: /nfs/backup
-    backup_user: mysql
+    mysql_backup_dir: /db/backup
+    backup_user: root
+    storage_resource_uri: ""
+    azcopy_bin_path: "{{ mysql_backup_dir }}"
+    blob_sas_token: ""
   
   tasks:
     # tasks file for mysql-backup
@@ -35,3 +38,10 @@
         user: "{{ backup_user }}"
         job: "{{ mysql_backup_dir }}/mysql-backup.sh"
         state: "present"
+
+    - name: Pass variables to role
+      ansible.builtin.include_role:
+        name: eduardolmedeiros.azcopy
+      vars:
+        azcopy_username: "{{ backup_user }}"
+        azcopy_group: "{{ backup_user }}"
