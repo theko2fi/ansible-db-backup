@@ -1,10 +1,15 @@
 - name: backup postgresql
   hosts: all
+  become: true
   vars:
-    postgresql_backup_dir: /nfs/backup
+    postgresql_backup_dir: /db/backup
     backup_user: postgres
+    storage_resource_uri: ""
+    azcopy_bin_path: "{{ postgresql_backup_dir }}"
+    blob_sas_token: ""
   
   tasks:
+
     # tasks file for postgresql-backup
     - name: postgresql backup | create backup directory
       become: true
@@ -35,3 +40,10 @@
         user: "{{ backup_user }}"
         job: "{{ postgresql_backup_dir }}/postgresql-backup.sh"
         state: "present"
+
+    - name: Pass variables to role
+      ansible.builtin.include_role:
+        name: eduardolmedeiros.azcopy
+      vars:
+        azcopy_username: "{{ backup_user }}"
+        azcopy_group: "{{ backup_user }}"
